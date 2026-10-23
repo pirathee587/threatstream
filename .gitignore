@@ -1,0 +1,26 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Java
+backend/**/target/
+*.class
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+
+# Python
+dataset-processor/.venv/
+dataset-processor/venv/
+dataset-processor/__pycache__/
+dataset-processor/**/*.py[cod]
+dataset-processor/.pytest_cache/
+
+# Local datasets and IDE files
+dataset-processor/data/
+.idea/
+.vscode/
+*.log

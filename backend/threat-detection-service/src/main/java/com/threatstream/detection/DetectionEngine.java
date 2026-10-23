@@ -1,0 +1,3 @@
+package com.threatstream.detection;
+import java.util.List; import org.springframework.stereotype.Service;
+@Service class DetectionEngine { private final EventValidator validator; private final EventDeduplicator dedup; private final List<DetectionRule> rules; private final AlertPublisher publisher; DetectionEngine(EventValidator v,EventDeduplicator d,List<DetectionRule> r,AlertPublisher p){validator=v;dedup=d;rules=r;publisher=p;} void process(AuthEvent event){validator.validate(event);if(!dedup.first(event.eventId()))return; rules.forEach(rule->rule.evaluate(event).ifPresent(publisher::publish));} }

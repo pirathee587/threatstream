@@ -1,0 +1,3 @@
+package com.threatstream.detection;
+import org.springframework.stereotype.Component;
+@Component class NetworkEventValidator { void validate(NetworkEvent e){if(e==null||e.eventId()==null||e.schemaVersion()!=1||!"NETWORK_FLOW".equals(e.eventType())||e.timestamp()==null||blank(e.sourceIp())||blank(e.destinationIp())||e.sourcePort()==null||e.destinationPort()==null||e.sourcePort()<0||e.sourcePort()>65535||e.destinationPort()<0||e.destinationPort()>65535||blank(e.protocol())||!finite(e.flowBytesPerSecond())||!finite(e.flowPacketsPerSecond()))throw new IllegalArgumentException("invalid network event");}private boolean blank(String x){return x==null||x.isBlank();}private boolean finite(Double x){return x==null||(Double.isFinite(x)&&x>=0);} }

@@ -1,0 +1,3 @@
+package com.threatstream.alert;
+import org.slf4j.*; import org.springframework.kafka.annotation.KafkaListener; import org.springframework.stereotype.Component;
+@Component class AlertConsumer { private static final Logger LOG=LoggerFactory.getLogger(AlertConsumer.class); private final AlertService service; AlertConsumer(AlertService s){service=s;} @KafkaListener(topics="${alert.topic}") void consume(AlertEvent event){try{service.persist(event);}catch(IllegalArgumentException e){LOG.warn("Rejected invalid security alert");throw e;}catch(RuntimeException e){LOG.warn("Alert persistence failed for {}",event==null?"unknown":event.alertId());throw e;}} }

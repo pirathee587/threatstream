@@ -1,0 +1,4 @@
+CREATE TABLE service_health_check (
+    id BIGSERIAL PRIMARY KEY,
+    checked_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

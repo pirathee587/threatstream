@@ -1,0 +1,3 @@
+package com.threatstream.alert;
+import org.apache.kafka.common.TopicPartition; import org.springframework.context.annotation.*; import org.springframework.kafka.core.KafkaTemplate; import org.springframework.kafka.listener.*; import org.springframework.util.backoff.FixedBackOff;
+@Configuration class KafkaErrorConfiguration { @Bean DefaultErrorHandler kafkaErrorHandler(KafkaTemplate<Object,Object> kafka,AlertProperties p){return new DefaultErrorHandler(new DeadLetterPublishingRecoverer(kafka,(record,error)->new TopicPartition(p.dltTopic(),record.partition())),new FixedBackOff(1000L,p.retryAttempts()));} }

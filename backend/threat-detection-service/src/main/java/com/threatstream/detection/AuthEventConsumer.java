@@ -1,0 +1,3 @@
+package com.threatstream.detection;
+import org.slf4j.Logger; import org.slf4j.LoggerFactory; import org.springframework.kafka.annotation.KafkaListener; import org.springframework.stereotype.Component;
+@Component class AuthEventConsumer { private static final Logger LOG=LoggerFactory.getLogger(AuthEventConsumer.class); private final DetectionEngine engine; AuthEventConsumer(DetectionEngine e){engine=e;} @KafkaListener(topics="${detection.auth-topic}") void consume(AuthEvent event){try{engine.process(event);}catch(IllegalArgumentException e){LOG.warn("Rejected invalid authentication event");throw e;}catch(RuntimeException e){LOG.warn("Authentication event processing failed for {}",event==null?"unknown":event.eventId());throw e;}} }

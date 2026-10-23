@@ -1,0 +1,3 @@
+package com.threatstream.alert;
+import java.util.*; import org.springframework.http.*; import org.springframework.web.bind.annotation.*;
+@RestControllerAdvice class ApiExceptionHandler { record ErrorResponse(String message){} @ExceptionHandler(NoSuchElementException.class) ResponseEntity<ErrorResponse> missing(){return ResponseEntity.status(404).body(new ErrorResponse("Alert not found."));} @ExceptionHandler({IllegalArgumentException.class,IllegalStateException.class}) ResponseEntity<ErrorResponse> invalid(){return ResponseEntity.badRequest().body(new ErrorResponse("Invalid alert request."));} }

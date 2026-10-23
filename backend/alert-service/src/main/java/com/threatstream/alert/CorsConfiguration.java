@@ -1,0 +1,3 @@
+package com.threatstream.alert;
+import java.util.List; import org.springframework.beans.factory.annotation.Value; import org.springframework.context.annotation.*; import org.springframework.web.cors.*; import org.springframework.web.servlet.config.annotation.*;
+@Configuration class CorsConfiguration implements WebMvcConfigurer { private final String origin; CorsConfiguration(@Value("${app.cors.allowed-origin:http://localhost:5173}")String origin){this.origin=origin;} @Override public void addCorsMappings(CorsRegistry registry){registry.addMapping("/api/**").allowedOrigins(origin).allowedMethods("GET","PATCH").allowedHeaders("Content-Type").maxAge(3600);} }

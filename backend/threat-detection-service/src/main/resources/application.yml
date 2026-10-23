@@ -1,0 +1,54 @@
+spring:
+  application.name: threat-detection-service
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: ${KAFKA_DETECTION_GROUP_ID:threat-detection-service-v1}
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.threatstream.detection
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: com.threatstream.detection.AuthEvent
+    listener.ack-mode: record
+    producer:
+      acks: all
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+detection:
+  auth-topic: ${KAFKA_TOPIC_AUTH_EVENTS:security.auth.events}
+  alert-topic: ${KAFKA_TOPIC_ALERTS:security.alerts}
+  dlt-topic: ${KAFKA_TOPIC_DLT:security.events.dlt}
+  retry-attempts: ${KAFKA_RETRY_ATTEMPTS:3}
+  dedup-retention: ${DETECTION_DEDUP_RETENTION:PT10M}
+  brute-force:
+    threshold: ${BRUTE_FORCE_THRESHOLD:10}
+    window: ${BRUTE_FORCE_WINDOW:PT60S}
+  password-spraying:
+    threshold: ${PASSWORD_SPRAYING_THRESHOLD:10}
+    window: ${PASSWORD_SPRAYING_WINDOW:PT120S}
+  suspicious-login:
+    threshold: ${SUSPICIOUS_LOGIN_THRESHOLD:5}
+    window: ${SUSPICIOUS_LOGIN_WINDOW:PT5M}
+network-detection:
+  topic: ${KAFKA_TOPIC_NETWORK_EVENTS:security.network.events}
+  max-tracked-keys: ${NETWORK_MAX_TRACKED_KEYS:10000}
+  port-scan:
+    threshold: ${PORT_SCAN_THRESHOLD:20}
+    window: ${PORT_SCAN_WINDOW:PT60S}
+    cooldown: ${PORT_SCAN_COOLDOWN:PT60S}
+  dos:
+    bytes-per-second: ${DOS_BYTES_PER_SECOND:10000000}
+    packets-per-second: ${DOS_PACKETS_PER_SECOND:10000}
+    window: ${DOS_WINDOW:PT60S}
+    cooldown: ${DOS_COOLDOWN:PT60S}
+  ddos:
+    bytes-per-second: ${DDOS_BYTES_PER_SECOND:20000000}
+    sources: ${DDOS_SOURCE_THRESHOLD:5}
+    window: ${DDOS_WINDOW:PT60S}
+    cooldown: ${DDOS_COOLDOWN:PT60S}
+server.port: ${SERVER_PORT:8082}
+management.endpoints.web.exposure.include: health,info
+logging.level.com.threatstream: INFO

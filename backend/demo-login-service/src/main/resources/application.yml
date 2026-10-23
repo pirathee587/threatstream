@@ -1,0 +1,23 @@
+spring:
+  application.name: demo-login-service
+  main.allow-bean-definition-overriding: true
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      acks: all
+      properties:
+        delivery.timeout.ms: 30000
+        request.timeout.ms: 10000
+        enable.idempotence: true
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+demo:
+  auth:
+    username: ${DEMO_LOGIN_USERNAME:demo-user}
+    password: ${DEMO_LOGIN_PASSWORD:}
+    topic: ${KAFKA_TOPIC_AUTH_EVENTS:security.auth.events}
+server.port: ${SERVER_PORT:8084}
+server.max-http-request-header-size: 8KB
+management.endpoints.web.exposure.include: health,info
+app.cors.allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:5173}
+logging.level.com.threatstream: INFO

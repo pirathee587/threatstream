@@ -1,0 +1,3 @@
+package com.threatstream.detection;
+import org.slf4j.*; import org.springframework.kafka.annotation.KafkaListener; import org.springframework.stereotype.Component;
+@Component class NetworkEventConsumer { private static final Logger LOG=LoggerFactory.getLogger(NetworkEventConsumer.class);private final NetworkDetectionEngine engine;NetworkEventConsumer(NetworkDetectionEngine e){engine=e;}@KafkaListener(topics="${network-detection.topic}",containerFactory="networkKafkaListenerContainerFactory")void consume(NetworkEvent event){try{engine.process(event);}catch(IllegalArgumentException e){LOG.warn("Rejected invalid network event");throw e;}catch(RuntimeException e){LOG.warn("Network event processing failed for {}",event==null?"unknown":event.eventId());throw e;}} }
