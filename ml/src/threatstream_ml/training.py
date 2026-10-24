@@ -9,7 +9,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, f1_score
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, f1_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -31,7 +31,7 @@ def _pipeline(model):
 
 def _evaluation(model, x, y) -> dict:
     started=time.perf_counter(); predicted=model.predict(x); elapsed=time.perf_counter()-started
-    return {"accuracy": float(accuracy_score(y,predicted)), "f1Macro": float(f1_score(y,predicted,average="macro",zero_division=0)), "f1Weighted": float(f1_score(y,predicted,average="weighted",zero_division=0)), "classificationReport": classification_report(y,predicted,output_dict=True,zero_division=0), "confusionMatrix": confusion_matrix(y,predicted,labels=sorted(y.unique())).tolist(), "confusionMatrixLabels": sorted(y.unique()), "inferenceSeconds": elapsed, "inferenceRows": int(len(x))}
+    return {"accuracy": float(accuracy_score(y,predicted)), "precisionMacro": float(precision_score(y,predicted,average="macro",zero_division=0)), "recallMacro": float(recall_score(y,predicted,average="macro",zero_division=0)), "f1Macro": float(f1_score(y,predicted,average="macro",zero_division=0)), "precisionWeighted": float(precision_score(y,predicted,average="weighted",zero_division=0)), "recallWeighted": float(recall_score(y,predicted,average="weighted",zero_division=0)), "f1Weighted": float(f1_score(y,predicted,average="weighted",zero_division=0)), "classificationReport": classification_report(y,predicted,output_dict=True,zero_division=0), "confusionMatrix": confusion_matrix(y,predicted,labels=sorted(y.unique())).tolist(), "confusionMatrixLabels": sorted(y.unique()), "inferenceSeconds": elapsed, "inferenceRows": int(len(x))}
 
 def train(dataset: Path, artifact_dir: Path, max_rows: int | None = None) -> dict:
     raw=load_csvs(dataset,max_rows); x,y=prepare_frame(raw); _assert_stratifiable(y)

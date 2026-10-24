@@ -1,5 +1,6 @@
 artifacts/
 reports/
 data/
+.venv/
 __pycache__/
 .pytest_cache/
