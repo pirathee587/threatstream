@@ -7,8 +7,6 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
-import java.io.File;
-import java.nio.file.Files;
 import java.time.Instant;
 import java.util.*;
 import org.bson.Document;
@@ -43,42 +41,12 @@ class MongoAtlasConnectivityIT {
   private final UUID testAlertId = UUID.randomUUID();
 
   private String resolveMongoUri() {
-    String uri = System.getenv("MONGODB_URI");
-    if (uri != null && !uri.isBlank()) {
-      return uri.trim();
-    }
-    String sysProp = System.getProperty("MONGODB_URI");
+    String sysProp = System.getProperty("it.mongo.uri");
     if (sysProp != null && !sysProp.isBlank()) {
       return sysProp.trim();
     }
-    File[] potentialEnvFiles = new File[] {
-        new File(".env"),
-        new File("../.env"),
-        new File("../../.env"),
-        new File("/home/piratheepan/Desktop/ThreatStream/.env")
-    };
-    for (File f : potentialEnvFiles) {
-      if (f.exists() && f.canRead()) {
-        try {
-          List<String> lines = Files.readAllLines(f.toPath());
-          for (String line : lines) {
-            String trimmed = line.trim();
-            if (trimmed.startsWith("MONGODB_URI=") && !trimmed.startsWith("#")) {
-              String val = trimmed.substring("MONGODB_URI=".length()).trim();
-              if (val.startsWith("\"") && val.endsWith("\"") && val.length() >= 2) {
-                val = val.substring(1, val.length() - 1);
-              }
-              if (val.startsWith("'") && val.endsWith("'") && val.length() >= 2) {
-                val = val.substring(1, val.length() - 1);
-              }
-              return val;
-            }
-          }
-        } catch (Exception ignored) {
-        }
-      }
-    }
-    return null;
+    String env = System.getenv("IT_MONGODB_URI");
+    return env == null || env.isBlank() ? null : env.trim();
   }
 
   @BeforeEach
@@ -86,15 +54,17 @@ class MongoAtlasConnectivityIT {
     mongoUri = resolveMongoUri();
     org.junit.jupiter.api.Assumptions.assumeTrue(
         mongoUri != null && !mongoUri.isBlank(),
-        "MONGODB_URI must be provided either via env, system property, or .env file");
+        "Set it.mongo.uri or IT_MONGODB_URI to an isolated integration database");
 
-    databaseName = System.getenv("MONGODB_DATABASE");
+    databaseName = System.getProperty("it.mongo.database", System.getenv("IT_MONGODB_DATABASE"));
     if (databaseName == null || databaseName.isBlank()) {
-      databaseName = "threatstream";
+      databaseName = "threatstream_integration";
     }
+    org.junit.jupiter.api.Assumptions.assumeTrue(databaseName.startsWith("threatstream_integration"),
+        "integration test database must use the threatstream_integration prefix");
 
     String masked = mongoUri.replaceAll("://[^@]+@", "://<masked-credentials>@");
-    LOG.info("Connecting to MongoDB Atlas at: {} (db: {})", masked, databaseName);
+    LOG.info("Connecting to isolated MongoDB integration database at: {} (db: {})", masked, databaseName);
 
     MongoClientSettings settings = MongoClientSettings.builder()
         .applyConnectionString(new ConnectionString(mongoUri))

@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+*.log
+.git
+.gitignore
+.idea
+.vscode
+target/
+**/target/
+node_modules/
+**/node_modules/
+dist/
+coverage/
+.pytest_cache/
+__pycache__/
+*.pyc

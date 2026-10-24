@@ -1,6 +1,8 @@
 spring:
   application.name: demo-login-service
   main.allow-bean-definition-overriding: true
+  lifecycle:
+    timeout-per-shutdown-phase: 15s
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
@@ -13,11 +15,39 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 demo:
   auth:
+    enabled: ${DEMO_AUTH_ENABLED:true}
+    rate-limit-per-minute: ${DEMO_RATE_LIMIT_PER_MINUTE:60}
     username: ${DEMO_LOGIN_USERNAME:demo-user}
     password: ${DEMO_LOGIN_PASSWORD:}
     topic: ${KAFKA_TOPIC_AUTH_EVENTS:security.auth.events}
-server.port: ${SERVER_PORT:8084}
-server.max-http-request-header-size: 8KB
-management.endpoints.web.exposure.include: health,info
+server:
+  port: ${SERVER_PORT:8084}
+  shutdown: graceful
+  max-http-request-header-size: 8KB
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
 app.cors.allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:5173}
-logging.level.com.threatstream: INFO
+logging:
+  level:
+    com.threatstream: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %5p [%15.15t] [%X{correlationId:-none}] %-40.40logger{39} : %m%n"

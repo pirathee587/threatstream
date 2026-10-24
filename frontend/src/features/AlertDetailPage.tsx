@@ -104,6 +104,7 @@ export function AlertDetailPage() {
       )}
 
       <p className="description">{alert.description}</p>
+      {alert.evidenceSummary && <p className="description">{alert.evidenceSummary}</p>}
 
       <dl>
         <dt>Alert ID</dt>
@@ -120,6 +121,12 @@ export function AlertDetailPage() {
         <dd>
           <span className={`badge ${alert.severity.toLowerCase()}`}>{alert.severity}</span>
         </dd>
+
+        <dt>Risk score</dt>
+        <dd>{typeof alert.riskScore === 'number' ? `${alert.riskScore}/100` : 'Not scored (legacy alert)'}</dd>
+
+        <dt>Matched rules</dt>
+        <dd>{alert.ruleIds?.length ? alert.ruleIds.join(', ') : alert.ruleId}</dd>
 
         <dt>Status</dt>
         <dd>

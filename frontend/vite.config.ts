@@ -10,4 +10,16 @@ export default defineConfig({
   resolve: { alias: { '@': path.resolve(directory, './src') } },
   server: { host: '0.0.0.0', port: 5173 },
   test: { environment: 'jsdom', setupFiles: './tests/setup.ts' },
+  build: {
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-charts': ['recharts'],
+          'vendor-icons': ['lucide-react'],
+        },
+      },
+    },
+  },
 });

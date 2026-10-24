@@ -1,5 +1,7 @@
 spring:
   application.name: alert-service
+  lifecycle:
+    timeout-per-shutdown-phase: 15s
   data:
     mongodb:
       uri: ${MONGODB_URI:}
@@ -12,18 +14,54 @@ spring:
       group-id: ${KAFKA_ALERT_GROUP_ID:alert-service-v1}
       enable-auto-commit: false
       auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
       properties:
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
         spring.json.trusted.packages: com.threatstream.alert
         spring.json.use.type.headers: false
         spring.json.value.default.type: com.threatstream.alert.AlertEvent
     listener.ack-mode: record
+    producer:
+      acks: all
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 alert:
   topic: ${KAFKA_TOPIC_ALERTS:security.alerts}
   dlt-topic: ${KAFKA_TOPIC_DLT:security.events.dlt}
   retry-attempts: ${KAFKA_RETRY_ATTEMPTS:3}
-app.cors.allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:5173}
-server.port: ${SERVER_PORT:8083}
-management.endpoints.web.exposure.include: health,info
-logging.level.com.threatstream: INFO
+app:
+  cors:
+    allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:5173}
+  security:
+    api-key: ${ALERT_SERVICE_API_KEY:${SECURITY_API_KEY:}}
+server:
+  port: ${SERVER_PORT:8083}
+  shutdown: graceful
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+logging:
+  level:
+    com.threatstream: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %5p [%15.15t] [%X{correlationId:-none}] %-40.40logger{39} : %m%n"

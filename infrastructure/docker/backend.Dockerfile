@@ -12,6 +12,9 @@ ARG MODULE
 RUN mvn -q -pl ${MODULE} -am package -DskipTests
 FROM eclipse-temurin:21-jre
 ARG MODULE
+RUN groupadd -r threatstream && useradd -r -g threatstream -d /app -s /sbin/nologin threatstream
+WORKDIR /app
 COPY --from=build /workspace/${MODULE}/target/*.jar /app/app.jar
-EXPOSE 8080
+RUN chown -R threatstream:threatstream /app
+USER threatstream:threatstream
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

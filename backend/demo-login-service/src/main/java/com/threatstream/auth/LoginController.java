@@ -14,9 +14,15 @@ class LoginController {
   private final LoginService loginService;
   LoginController(LoginService loginService) { this.loginService = loginService; }
   @PostMapping("/login")
-  ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest servletRequest) {
+  ResponseEntity<LoginResponse> login(
+      @Valid @RequestBody LoginRequest request, HttpServletRequest servletRequest) {
+    if (!loginService.isDemoEnabled()) {
+      return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN)
+          .body(new LoginResponse("Demo authentication endpoint is disabled in this environment."));
+    }
     boolean successful = loginService.login(request, servletRequest.getRemoteAddr());
-    return successful ? ResponseEntity.ok(new LoginResponse("Demo login successful."))
+    return successful
+        ? ResponseEntity.ok(new LoginResponse("Demo login successful."))
         : ResponseEntity.status(401).body(new LoginResponse("Invalid credentials."));
   }
 }

@@ -39,9 +39,12 @@ class AlertController {
 
     if (page < 0
         || size < 1
+        || size > 100
         || !SORTS.contains(sortBy)
         || (severity != null && !Set.of("MEDIUM", "HIGH", "CRITICAL").contains(severity))
         || (status != null && !Set.of("OPEN", "ACKNOWLEDGED", "RESOLVED").contains(status))
+        || (threatType != null && (threatType.length() > 64 || !threatType.matches("^[A-Za-z0-9_ -]+$")))
+        || (sourceIp != null && (sourceIp.length() > 64 || !sourceIp.matches("^[A-Za-z0-9.:%-]+$")))
         || (from != null && to != null && from.isAfter(to))) {
       throw new IllegalArgumentException("invalid query");
     }

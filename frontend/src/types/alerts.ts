@@ -11,6 +11,9 @@ export interface Alert {
   sourceIp?: string | null;
   description: string;
   evidence?: Record<string, unknown> | null;
+  riskScore?: number | null;
+  ruleIds?: string[] | null;
+  evidenceSummary?: string | null;
   firstSeen: string;
   lastSeen: string;
   detectedAt: string;

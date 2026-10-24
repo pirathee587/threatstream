@@ -15,6 +15,7 @@ class LoginControllerTest {
     HttpServletRequest request = mock(HttpServletRequest.class);
     when(request.getRemoteAddr()).thenReturn("10.0.0.8");
     when(request.getHeader("X-Forwarded-For")).thenReturn("203.0.113.9");
+    when(service.isDemoEnabled()).thenReturn(true);
     when(service.login(any(), any())).thenReturn(false);
     var response = new LoginController(service).login(new LoginRequest("alice", "not-a-secret"), request);
     assertThat(response.getStatusCode().value()).isEqualTo(401);
