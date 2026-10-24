@@ -49,6 +49,9 @@ class AlertService {
     doc.setSourceIp(x.sourceIp());
     doc.setDescription(x.description());
     doc.setEvidence(x.evidence() == null ? Collections.emptyMap() : x.evidence());
+    doc.setRiskScore(x.riskScore());
+    doc.setRuleIds(x.ruleIds());
+    doc.setEvidenceSummary(x.evidenceSummary());
     doc.setFirstSeen(x.firstSeen());
     doc.setLastSeen(x.lastSeen());
     doc.setDetectedAt(x.detectedAt());

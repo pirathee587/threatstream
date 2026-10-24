@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 class EventDeduplicator {
 
+  private static final int MAX_CAPACITY = 100_000;
   private final LinkedHashMap<UUID, Instant> seen = new LinkedHashMap<>();
   private final Clock clock;
   private final DetectionProperties props;
@@ -26,10 +27,20 @@ class EventDeduplicator {
   }
 
   synchronized boolean first(UUID id) {
+    if (id == null) {
+      return false;
+    }
     Instant cutoff = clock.instant().minus(props.dedupRetention());
     Iterator<Instant> it = seen.values().iterator();
     while (it.hasNext() && it.next().isBefore(cutoff)) {
       it.remove();
+    }
+    if (seen.size() >= MAX_CAPACITY) {
+      Iterator<UUID> keyIt = seen.keySet().iterator();
+      if (keyIt.hasNext()) {
+        keyIt.next();
+        keyIt.remove();
+      }
     }
     return seen.putIfAbsent(id, clock.instant()) == null;
   }

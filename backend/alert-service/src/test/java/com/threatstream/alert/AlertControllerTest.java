@@ -15,7 +15,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(AlertController.class)
-@Import(ApiExceptionHandler.class)
+@Import({ApiExceptionHandler.class, SecurityConfiguration.class})
 class AlertControllerTest {
 
   @Autowired private MockMvc mockMvc;

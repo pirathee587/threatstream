@@ -9,12 +9,26 @@ import org.springframework.stereotype.Service;
 class LoginService {
   private final String configuredUsername;
   private final String configuredPassword;
+  private final boolean demoEnabled;
   private final AuthenticationEventFactory eventFactory;
   private final AuthenticationEventPublisher publisher;
 
-  LoginService(@Value("${demo.auth.username}") String configuredUsername,
-      @Value("${demo.auth.password}") String configuredPassword, AuthenticationEventFactory eventFactory,
-      AuthenticationEventPublisher publisher) { this.configuredUsername = configuredUsername; this.configuredPassword = configuredPassword; this.eventFactory = eventFactory; this.publisher = publisher; }
+  LoginService(
+      @Value("${demo.auth.username:demo-user}") String configuredUsername,
+      @Value("${demo.auth.password:}") String configuredPassword,
+      @Value("${demo.auth.enabled:true}") boolean demoEnabled,
+      AuthenticationEventFactory eventFactory,
+      AuthenticationEventPublisher publisher) {
+    this.configuredUsername = configuredUsername;
+    this.configuredPassword = configuredPassword != null ? configuredPassword : "";
+    this.demoEnabled = demoEnabled;
+    this.eventFactory = eventFactory;
+    this.publisher = publisher;
+  }
+
+  boolean isDemoEnabled() {
+    return demoEnabled;
+  }
 
   boolean login(LoginRequest request, String sourceIp) {
     String username = request.username().trim().toLowerCase(java.util.Locale.ROOT);

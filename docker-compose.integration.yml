@@ -1,0 +1,26 @@
+# Local-only override. Use with docker-compose.yml; it never uses MONGODB_URI from .env.
+services:
+  mongo-test:
+    profiles: [integration]
+    image: mongo:8.0
+    environment:
+      MONGO_INITDB_DATABASE: threatstream_integration
+    ports: ["127.0.0.1:27018:27017"]
+    volumes: [mongo-integration-data:/data/db]
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok' | grep 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  alert-service:
+    environment:
+      MONGODB_URI: mongodb://mongo-test:27017/threatstream_integration
+      MONGODB_DATABASE: threatstream_integration
+    depends_on:
+      mongo-test:
+        condition: service_healthy
+
+volumes:
+  mongo-integration-data: {}

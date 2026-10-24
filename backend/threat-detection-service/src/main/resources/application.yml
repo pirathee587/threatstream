@@ -1,14 +1,18 @@
 spring:
   application.name: threat-detection-service
+  lifecycle:
+    timeout-per-shutdown-phase: 15s
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
       group-id: ${KAFKA_DETECTION_GROUP_ID:threat-detection-service-v1}
       auto-offset-reset: earliest
       enable-auto-commit: false
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
       properties:
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
         spring.json.trusted.packages: com.threatstream.detection
         spring.json.use.type.headers: false
         spring.json.value.default.type: com.threatstream.detection.AuthEvent
@@ -23,6 +27,10 @@ detection:
   dlt-topic: ${KAFKA_TOPIC_DLT:security.events.dlt}
   retry-attempts: ${KAFKA_RETRY_ATTEMPTS:3}
   dedup-retention: ${DETECTION_DEDUP_RETENTION:PT10M}
+  max-tracked-sources: ${DETECTION_MAX_TRACKED_SOURCES:10000}
+  max-tracked-usernames: ${DETECTION_MAX_TRACKED_USERNAMES:1000}
+  state-expiration: ${DETECTION_STATE_EXPIRATION:PT10M}
+  cleanup-interval: ${DETECTION_CLEANUP_INTERVAL:PT1M}
   brute-force:
     threshold: ${BRUTE_FORCE_THRESHOLD:10}
     window: ${BRUTE_FORCE_WINDOW:PT60S}
@@ -32,6 +40,13 @@ detection:
   suspicious-login:
     threshold: ${SUSPICIOUS_LOGIN_THRESHOLD:5}
     window: ${SUSPICIOUS_LOGIN_WINDOW:PT5M}
+  risk:
+    brute-force-weight: ${RISK_BRUTE_FORCE_WEIGHT:60}
+    password-spraying-weight: ${RISK_PASSWORD_SPRAYING_WEIGHT:70}
+    suspicious-login-weight: ${RISK_SUSPICIOUS_LOGIN_WEIGHT:45}
+    medium-max: ${RISK_MEDIUM_MAX:49}
+    high-max: ${RISK_HIGH_MAX:74}
+    maximum: ${RISK_MAXIMUM:100}
 network-detection:
   topic: ${KAFKA_TOPIC_NETWORK_EVENTS:security.network.events}
   max-tracked-keys: ${NETWORK_MAX_TRACKED_KEYS:10000}
@@ -49,6 +64,32 @@ network-detection:
     sources: ${DDOS_SOURCE_THRESHOLD:5}
     window: ${DDOS_WINDOW:PT60S}
     cooldown: ${DDOS_COOLDOWN:PT60S}
-server.port: ${SERVER_PORT:8082}
-management.endpoints.web.exposure.include: health,info
-logging.level.com.threatstream: INFO
+server:
+  port: ${SERVER_PORT:8082}
+  shutdown: graceful
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+logging:
+  level:
+    com.threatstream: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %5p [%15.15t] [%X{correlationId:-none}] %-40.40logger{39} : %m%n"

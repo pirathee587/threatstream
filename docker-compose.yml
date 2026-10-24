@@ -49,12 +49,26 @@ services:
     build: { context: ./backend, dockerfile: ../infrastructure/docker/backend.Dockerfile, args: { MODULE: event-collector-service } }
     environment: { KAFKA_BOOTSTRAP_SERVERS: kafka:9092, SERVER_PORT: 8081 }
     ports: ["127.0.0.1:8081:8081"]
+    stop_grace_period: 20s
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8081/actuator/health/liveness || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     depends_on: { kafka-init: { condition: service_completed_successfully } }
   threat-detection-service:
     profiles: [apps]
     build: { context: ./backend, dockerfile: ../infrastructure/docker/backend.Dockerfile, args: { MODULE: threat-detection-service } }
     environment: { KAFKA_BOOTSTRAP_SERVERS: kafka:9092, SERVER_PORT: 8082 }
     ports: ["127.0.0.1:8082:8082"]
+    stop_grace_period: 20s
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8082/actuator/health/liveness || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     depends_on: { kafka-init: { condition: service_completed_successfully } }
   alert-service:
     profiles: [apps]
@@ -63,8 +77,16 @@ services:
       MONGODB_URI: ${MONGODB_URI:?Set MONGODB_URI in .env}
       MONGODB_DATABASE: ${MONGODB_DATABASE:-threatstream}
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      ALERT_SERVICE_API_KEY: ${ALERT_SERVICE_API_KEY:-}
       SERVER_PORT: 8083
     ports: ["127.0.0.1:8083:8083"]
+    stop_grace_period: 20s
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8083/actuator/health/liveness || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     depends_on: { kafka-init: { condition: service_completed_successfully } }
   demo-login-service:
     profiles: [apps]
@@ -73,8 +95,18 @@ services:
       SERVER_PORT: 8084
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_TOPIC_AUTH_EVENTS: security.auth.events
+      DEMO_AUTH_ENABLED: ${DEMO_AUTH_ENABLED:-true}
+      DEMO_RATE_LIMIT_PER_MINUTE: ${DEMO_RATE_LIMIT_PER_MINUTE:-60}
       DEMO_LOGIN_USERNAME: ${DEMO_LOGIN_USERNAME:-demo-user}
       DEMO_LOGIN_PASSWORD: ${DEMO_LOGIN_PASSWORD:?Set DEMO_LOGIN_PASSWORD in .env}
     ports: ["127.0.0.1:8084:8084"]
+    stop_grace_period: 20s
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8084/actuator/health/liveness || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    depends_on: { kafka-init: { condition: service_completed_successfully } }
 
 volumes: { kafka-data: {}, postgres-data: {} }

@@ -55,6 +55,15 @@ public class AlertDocument {
   @Field("evidence")
   private Map<String, Object> evidence;
 
+  @Field("riskScore")
+  private Integer riskScore;
+
+  @Field("ruleIds")
+  private java.util.List<String> ruleIds;
+
+  @Field("evidenceSummary")
+  private String evidenceSummary;
+
   @Field("firstSeen")
   private Instant firstSeen;
 
@@ -158,6 +167,12 @@ public class AlertDocument {
   public void setEvidence(Map<String, Object> evidence) {
     this.evidence = evidence;
   }
+  public Integer getRiskScore() { return riskScore; }
+  public void setRiskScore(Integer riskScore) { this.riskScore = riskScore; }
+  public java.util.List<String> getRuleIds() { return ruleIds != null ? java.util.List.copyOf(ruleIds) : Collections.emptyList(); }
+  public void setRuleIds(java.util.List<String> ruleIds) { this.ruleIds = ruleIds; }
+  public String getEvidenceSummary() { return evidenceSummary; }
+  public void setEvidenceSummary(String evidenceSummary) { this.evidenceSummary = evidenceSummary; }
 
   public Instant getFirstSeen() {
     return firstSeen;

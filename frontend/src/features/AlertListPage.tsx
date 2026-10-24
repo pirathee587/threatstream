@@ -240,6 +240,7 @@ export function AlertListPage() {
               <thead>
                 <tr>
                   <th>Severity</th>
+                  <th>Risk</th>
                   <th>Threat Type</th>
                   <th>Description</th>
                   <th>Source IP</th>
@@ -256,6 +257,7 @@ export function AlertListPage() {
                         {alert.severity}
                       </span>
                     </td>
+                    <td>{typeof alert.riskScore === 'number' ? `${alert.riskScore}/100` : '—'}</td>
                     <td>
                       <Link to={`/alerts/${alert.alertId}`}>
                         <strong>{alert.threatType}</strong>
